@@ -1,57 +1,49 @@
 # FastAPI VNPAY Integration
 
-## Giới thiệu
-Dự án này tích hợp VNPAY vào FastAPI để hỗ trợ thanh toán trực tuyến.
+## Mô tả
+Ứng dụng này tích hợp VNPAY với FastAPI để tạo thanh toán và xử lý phản hồi từ VNPAY.
 
 ## Cài đặt
 1. Cài đặt các thư viện cần thiết:
    ```sh
    pip install fastapi uvicorn python-dotenv
    ```
-2. Tạo tệp `.env` và thêm thông tin cấu hình:
+2. Tạo file `.env` và điền các thông tin cấu hình:
    ```env
-   VNPAY_URL=<URL_CUA_VNPAY>
-   VNPAY_TMN_CODE=<MA_TMN>
-   VNPAY_HASH_SECRET=<CHUOI_BI_MAT>
-   VNPAY_RETURN_URL=<URL_TRA_VE>
+   VNPAY_URL=<URL CỦA VNPAY>
+   VNPAY_TMN_CODE=<MÃ TMN>
+   VNPAY_HASH_SECRET=<MẬT KHẨU BÍ MẬT>
+   VNPAY_RETURN_URL=<URL TRẢ VỀ>
+   ```
+3. Chạy ứng dụng với lệnh:
+   ```sh
+   uvicorn main:app --reload
    ```
 
-## Khởi chạy ứng dụng
-Chạy lệnh sau để khởi động server với chế độ reload:
-```sh
-uvicorn main:app --reload
-```
-
 ## API Endpoints
-### 1. Tạo yêu cầu thanh toán
-- **Endpoint:** `GET /create_payment`
-- **Tham số:**
-  - `amount`: Số tiền cần thanh toán (đơn vị VND)
-  - `order_desc`: Mô tả đơn hàng
-- **Response:** Trả về `payment_url` để chuyển hướng người dùng đến VNPAY.
-
-### 2. Xử lý phản hồi từ VNPAY
-- **Endpoint:** `GET /vnpay_return`
-- **Mô tả:** Kiểm tra và xác thực chữ ký phản hồi từ VNPAY.
-- **Response:**
-  - Thành công: Trả về thông tin giao dịch.
-  - Thất bại: Trả về lỗi tương ứng.
+- `GET /create_payment?amount=<int>&order_desc=<str>`
+  - Tạo URL thanh toán với VNPAY.
+- `GET /vnpay_return`
+  - Xử lý phản hồi từ VNPAY.
 
 ## Sơ đồ luồng hoạt động
 ```mermaid
-graph TD;
-    A[Người dùng] -->|Gửi yêu cầu thanh toán| B[FastAPI Server];
-    B -->|Tạo chữ ký và URL| C[VNPAY Payment URL];
-    C -->|Người dùng thanh toán| D[VNPAY Server];
-    D -->|Phản hồi kết quả| B;
-    B -->|Kiểm tra chữ ký và trả về kết quả| A;
+sequenceDiagram
+    participant User
+    participant FastAPI
+    participant VNPAY
+    
+    User->>FastAPI: (1) Gửi yêu cầu thanh toán (/create_payment)
+    FastAPI->>VNPAY: (2) Chuyển hướng người dùng đến VNPAY
+    User->>VNPAY: (3) Nhập thông tin và xác nhận thanh toán
+    VNPAY->>FastAPI: (4) Gửi phản hồi kết quả thanh toán (/vnpay_return)
+    FastAPI->>User: (5) Trả về kết quả giao dịch
 ```
 
 ## Ghi chú
-- Đảm bảo môi trường `.env` chứa thông tin chính xác.
-- Kiểm tra kết nối mạng khi gọi API VNPAY.
-- Thử nghiệm với sandbox trước khi triển khai thực tế.
+- `vnp_SecureHash` được sử dụng để xác minh tính hợp lệ của giao dịch.
+- Chữ ký được tạo bằng thuật toán HMAC SHA512.
 
-## License
-MIT
+## Liên hệ
+Nếu có vấn đề, vui lòng liên hệ để được hỗ trợ.
 
